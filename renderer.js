@@ -9,7 +9,7 @@ const DATABASE_DRIVER = "sqlite3";
 const DATATABLE_ID = "#example";
 const databaseholder = require(DATABASE_DRIVER);
 var table =$(DATATABLE_ID).DataTable();
-
+var querycountertext = "";
 
 
 function addbuttonlistener(btnid,queryholderid,updateholderid)
@@ -17,7 +17,24 @@ function addbuttonlistener(btnid,queryholderid,updateholderid)
 var ModalElBtn = document.getElementById(btnid);
 ModalElBtn.addEventListener('click', function (event) {
 	var querytext = document.querySelector("#" + queryholderid).value;
-	executequery(querytext,updateholderid);
+	var indexofwhere = querytext.toLowerCase().indexOf('where');
+	var whereclause = querytext.substr(indexofwhere, querytext.length - indexofwhere);
+	if (querytext.toLowerCase().indexOf("select") == 0)
+	{
+		var tablename = document.querySelector('#selecttablenames').value;
+		if (querytext.toLowerCase().includes(" limit "))
+		{
+		
+			populatedatatables(querytext,tablename,querycountertext + " " + whereclause,querytext);
+		} else{
+			populatedatatables(querytext + " LIMIT 1 ",tablename,querycountertext,querytext);
+		}
+		
+	} else{
+		
+		executequery(querytext,updateholderid);
+	}
+	
 });
 	
 }
@@ -112,13 +129,13 @@ function rundatatable(arrdata) {
     table.draw();
 	
 } 
-function setupdbstuff(tablename)
+function setupdbstuff(counterquery,latterquery)
 { 
 var intnum = 0;
 var recordcount = 0;
 var db = new databaseholder.Database(DATABASE_FILENAME);
 var bar = new Promise((resolve, reject) => {
-db.each("SELECT count(*) as cnt FROM " + tablename + " order by rowid desc", function (err, row) {
+db.each(counterquery, function (err, row) {
 	 recordcount = row.cnt;
 	 updaterowcount(recordcount);
 	 console.log ('count ' + recordcount);
@@ -130,7 +147,7 @@ bar.then(() => {
 	var arrdata = new Array();
 	
 	var innerbar = new Promise((resolve, reject) => {
-	db.each("SELECT * FROM " + tablename + " order by rowid desc", function (err, row) {
+	db.each(latterquery, function (err, row) {
 	 arrdata.push(Object.values(row));
 	 console.log('working inside');
 	 intnum += 1;
@@ -142,7 +159,7 @@ bar.then(() => {
 	});
 }); 
 }
-function getColumnNames(tablename, formgenerationid)
+function getColumnNames(tablename, formgenerationid,textareaid,updateholderid,queryprefix)
 { 
 var intnum = 0;
 var recordcount = 0;
@@ -164,7 +181,7 @@ bar.then(() => {
 	 arrdata.push(row);
 	 console.log('working inside column names');
 	 intnum += 1;
-	 if (intnum === recordcount) { populate_generatedform(arrdata,formgenerationid,tablename); resolve();}
+	 if (intnum === recordcount) { populate_generatedform(arrdata,formgenerationid,tablename,textareaid,updateholderid,queryprefix); resolve();}
 	 });
    });
 	innerbar.then(() => {
@@ -173,12 +190,13 @@ bar.then(() => {
 }); 
 }
 
-function populate_generatedform(arrdata,id,tablename)
+function populate_generatedform(arrdata,id,tablename,textareaid,updateholderid,queryprefix)
 {
 	console.log('form generating...');
 	var formbody = document.querySelector(id);
 	formbody.innerHTML = "";
 	var columnnames = "";
+	var updatecolumnsvalues = "";
 	var columnvalues = "";
 	  for (let k in arrdata)
 	{
@@ -192,39 +210,67 @@ function populate_generatedform(arrdata,id,tablename)
 		} else
 		{
 			columnvalues = columnvalues + "'',"
+			updatecolumnsvalues = updatecolumnsvalues + arrdata[k].name + "='',";
 		}
 		formbody.innerHTML = formbody.innerHTML + modal_row(arrdata[k].name,arrdata[k].type + '  ' + nulldecide + '  ' +  ispk);
 		
 	}
 	columnnames = columnnames.substr(0,columnnames.length - 1);
 	columnvalues = columnvalues.substr(0,columnvalues.length - 1);
-	var querytext = "INSERT INTO " + tablename + " (" + columnnames + ") values(" + columnvalues + ")";
-	console.log(querytext);
-	document.querySelector("#inputaddquery").innerHTML = querytext;
+	updatecolumnsvalues = updatecolumnsvalues.substr(0,updatecolumnsvalues.length - 1);
+	var querytext = "";
 	
-	document.querySelector("#adddataupdateholder").style.background = 'white';
-    document.querySelector("#adddataupdateholder").innerHTML = '';
-	document.querySelector("#inputaddquery").value = querytext;
+	if (queryprefix.toLowerCase().indexOf('select') == 0)
+	{
+		querytext = queryprefix + " " + columnnames + " FROM " + tablename + " WHERE 1=1";
+		querycountertext = queryprefix + " COUNT(*) as cnt " + " FROM " + tablename;
+	}
+	if (queryprefix.toLowerCase().indexOf('Insert') == 0)
+	{
+		querytext = queryprefix + " " + tablename + " (" + columnnames + ") values(" + columnvalues + ")";
+	}
+	
+	if (queryprefix.toLowerCase().indexOf('update') == 0)
+	{
+		querytext = queryprefix + " " + tablename + " SET " + updatecolumnsvalues + " WHERE rowid=1";
+	}
+	if (queryprefix.toLowerCase().indexOf('delete') == 0)
+	{
+		querytext = queryprefix + " FROM " + tablename + " WHERE rowid=1";
+	}
+	if (queryprefix.toLowerCase().indexOf('drop') == 0)
+	{
+		querytext = queryprefix + " " + tablename;
+	}
+	if (queryprefix.toLowerCase().indexOf('alter') == 0)
+	{
+		querytext = queryprefix + " TABLE " + tablename;
+	}
+	console.log(querytext);
+	document.querySelector(textareaid).innerHTML = querytext;
+	
+	document.querySelector(updateholderid).style.background = 'white';
+    document.querySelector(updateholderid).innerHTML = '';
+	document.querySelector(textareaid).value = querytext;
 }
 
-function populatedatatables(tablename)
+function populatedatatables(tablequery,tablename,counterquery,resultsquery)
 { 
 console.log('Finding Columns For ' + tablename);
 var db = new databaseholder.Database(DATABASE_FILENAME);
 var intnum = 0;
 var recordcount = 0;
 var bar = new Promise((resolve, reject) => {
-db.get("SELECT * FROM " + tablename + " LIMIT 1", function (err, row) {
-//db.get("PRAGMA table_info(contacts);", function (err, row) {
+db.get(tablequery, function (err, row) {
 	 console.log('this ran');
 	 console.log(err);
 	 console.log(row);
 	 if (row){
-		 addtableheads(Object.keys(row),tablename,true);
+		 addtableheads(Object.keys(row),tablename,true,counterquery,resultsquery);
 	 
 	 resolve(); 
 	 } else{
-		addtableheads(null,tablename, false);
+		addtableheads(null,tablename, false,null,null);
 		updaterowcount(0);
 		alert("Looks like table is empty"); 
 	 }
@@ -239,7 +285,7 @@ bar.then(() => {
 
 }
 
-function addtableheads(arr,tablename,move)
+function addtableheads(arr,tablename,move,counterquery,resultsquery)
 {
 	
 	
@@ -258,7 +304,7 @@ function addtableheads(arr,tablename,move)
 		tableheader.appendChild(head);  
 		
 	}
-	  setupdbstuff(tablename);
+	  setupdbstuff(counterquery,resultsquery);
   } else{
 	  var tableheader = document.querySelector(DATATABLE_ID + " > thead > tr" );
 	tableheader.innerHTML = "";
@@ -275,7 +321,7 @@ function setup_eventlisteners()
 	   var tablename = document.querySelector('#selecttablenames').value;
 	   if (tablename != "0")
 	   {
-		   populatedatatables(tablename);	
+		   populatedatatables("SELECT * FROM " + tablename + " LIMIT 1", tablename, "SELECT count(*) as cnt FROM " + tablename + " order by rowid desc","SELECT * FROM " + tablename + " order by rowid desc");	
 		   updatetablename(tablename);
 	   } else{
 		   
@@ -297,7 +343,7 @@ function setup_eventlisteners()
 	   if (tablename != "0")
 	   {
 		  
-		   getColumnNames(tablename,"#inputformholder");
+		   getColumnNames(tablename,"#inputformholder","#inputaddquery","#adddataupdateholder","INSERT INTO ");
 	   } else{
 		   
 		   alert('select a table');
@@ -305,6 +351,19 @@ function setup_eventlisteners()
 	
   });
   
+  var ModalQBtn = document.querySelector('#inputformgeneratorq');
+   ModalQBtn.addEventListener('click', function (event) {
+	   var tablename = document.querySelector('#selecttablenames').value;
+	   if (tablename != "0")
+	   {
+		  
+		   getColumnNames(tablename,"#inputformholderq","#inputrunquery","#queryupdateholder",document.querySelector('#selectQueryType').value);
+	   } else{
+		   
+		   alert('select a table');
+	   }
+	
+  });
   
   var ModalDeLBtn = document.querySelector('#deletedata_btn');
   var popover = new bootstrap.Popover(ModalDeLBtn, {sanitize:false, animation: true, html: true, placement:'top', title:'ARE YOU SURE?',template: '<div class="popover" role="tooltip"><div class="popover-arrow"></div><h3 class="popover-header"></h3><div class="popover-body text-center"> </div></div>',content:'<button type="button" id="confirmdeletedata_btn" class="btn btn-danger">Yes?</button>'});
@@ -337,4 +396,5 @@ dbapp_populateinfo();
 setup_eventlisteners();
 addbuttonlistener("createtablesave_btn","inputcreatequery","createtableupdateholder");
 addbuttonlistener("tabledatasave_btn","inputaddquery","adddataupdateholder");
+addbuttonlistener("querytabledatasave_btn","inputrunquery","queryupdateholder");
 gettablenames();

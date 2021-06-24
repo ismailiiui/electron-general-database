@@ -155,7 +155,41 @@
     <button type="button" id="adddata_btn" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#AddNewTableDataModal">Add Data</button>
     </div>
    <div class="col">
-    <button type="button" id="searchdata_btn" class="btn btn-secondary">Search Data</button>
+    <button type="button" id="querydata_btn" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#QueryTableDataModal">Query</button>
+	<div class="modal fade" id="QueryTableDataModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="QueryTableDataModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="QueryTableDataModalLabel">Run A Query</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+	  
+	   <h4>SELECT A QUERY TYPE</h4>
+  	<select id="selectQueryType" class="form-select" aria-label="Default select example">
+  <option selected value="SELECT">SELECT</option>
+  <option  value="UPDATE">UPDATE</option>
+  <option  value="DELETE">DELETE</option>
+  <option  value="ALTER">ALTER</option>
+   <option  value="DROP">DROP</option>
+</select>
+  <button type="button" id="inputformgeneratorq" class="btn btn-secondary">Pull Table Info</button>
+  <hr>
+  <span id="inputformholderq">
+
+  
+  </span>
+  <small>You may changes this query according to the needs. Add values separated by comma in the same order</small>
+   <textarea class="form-control" id="inputrunquery" rows="8"></textarea>
+  <p id="queryupdateholder">Click save and wait for confirmation</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+		<button type="button" id="querytabledatasave_btn" class="btn btn-secondary">Save/Run</button>
+      </div>
+    </div>
+  </div>
+</div>
     </div>
 	 <div class="col">
     <button type="button" id="deletedata_btn"  class="btn btn-danger">Delete table</button>

@@ -3,6 +3,9 @@
 **Clone and run for a quick way to see Electron and Node.js in action.**
 
 This application is built upon Electron, Node and Sqlite3
+## Database File
+
+Database file is called file.db. If you are an end user, make sure to backup this file before updating.
 
 ## To Use
 
