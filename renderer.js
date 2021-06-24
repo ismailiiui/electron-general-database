@@ -50,9 +50,9 @@ db.run(querytext, function (err, row) {
 	 {
 		 if (updateholderid)
 		{
-		 document.querySelector("#" + updateholderid).innerHTML = err;
-		 document.querySelector("#" + updateholderid).style.background = 'red';
-		 document.querySelector("#" + updateholderid).style.color = 'white';
+		 document.querySelector(updateholderid).innerHTML = err;
+		 document.querySelector(updateholderid).style.background = 'red';
+		 document.querySelector(updateholderid).style.color = 'white';
 		}
 	 } else{
 		 resolve();
@@ -64,9 +64,9 @@ bar.then(() => {
     console.log('Finished');	
 	if (updateholderid)
 	{
-	document.querySelector("#" + updateholderid).innerHTML = 'Finished';
-	document.querySelector("#" + updateholderid).style.background = 'green';
-    document.querySelector("#" + updateholderid).style.color = 'white';
+	document.querySelector(updateholderid).innerHTML = 'Finished';
+	document.querySelector(updateholderid).style.background = 'green';
+    document.querySelector(updateholderid).style.color = 'white';
 	}
 	db.close();
 	if (querytext.toLowerCase().includes("create table"))
@@ -225,7 +225,7 @@ function populate_generatedform(arrdata,id,tablename,textareaid,updateholderid,q
 		querytext = queryprefix + " " + columnnames + " FROM " + tablename + " WHERE 1=1";
 		querycountertext = queryprefix + " COUNT(*) as cnt " + " FROM " + tablename;
 	}
-	if (queryprefix.toLowerCase().indexOf('Insert') == 0)
+	if (queryprefix.toLowerCase().indexOf('insert') == 0)
 	{
 		querytext = queryprefix + " " + tablename + " (" + columnnames + ") values(" + columnvalues + ")";
 	}
