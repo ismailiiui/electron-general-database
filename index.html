@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+        <meta name="description" content="" />
+        <meta name="author" content="" />
+        <title>Database Based Application</title>
+        <!-- Favicon-->
+        <link rel="icon" type="image/x-icon" href="assets/favicon.ico" />
+        <!-- Bootstrap icons-->
+        <link href="icons-1.5.0/font/bootstrap-icons.css" rel="stylesheet" />
+		<link href="datatables/jquery.dataTables.min.css" rel="stylesheet" />
+        <!-- Core theme CSS (includes Bootstrap)-->
+        <link href="css/bootstrap.css" rel="stylesheet" />
+		<link rel="stylesheet" type="text/css" href="datatables/datatables.min.css"/>
+
+    </head>
+    <body>
+        <!-- Responsive navbar-->
+        <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+            <div class="container px-lg-5">
+                <a class="navbar-brand" href="#!">Database Based Application</a>
+            </div>
+        </nav>
+        <!-- Header-->
+		<div class="modal fade" id="superModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="superModalLabel">Modal title</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+	  <form id="supermodalform" class="row g-3 needs-validation">
+
+          <div class="mb-3 row">
+    <label for="inputbarcode" class="col-sm-2 col-form-label">Barcode</label>
+    <div class="col-sm-10">
+      <input type="text" required class="form-control" id="inputbarcode">
+    </div>
+
+  </div>
+         <div class="mb-3 row">
+    <label for="inputquantity" class="col-sm-2 col-form-label">Quantity</label>
+    <div class="col-sm-10">
+      <input type="text" required class="form-control" id="inputquantity">
+    </div>
+
+  </div>
+  
+</form>
+      </div>
+      <div class="modal-footer">
+
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        <button type="button" id="addproductsavechanges" class="btn btn-primary" >Save changes</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+        <header class="py-5">
+            <div class="container px-lg-5">
+			<div class="card" style="width: 18rem;">
+			<div class="card-header">
+				System
+			</div>
+			<ul class="list-group list-group-flush">
+				<li class="list-group-item"><span id="computername" class="badge bg-secondary"></span></li>
+				<li class="list-group-item"><span id="cpuusage" class="badge bg-secondary"></span></li>
+			</ul>
+</div>
+	<div class="card">
+  <h5 class="card-header">Features</h5>
+  <div class="card-body">
+  <div class="row">
+    <div class="col">
+         <button type="button" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#AddNewTableModal">
+  Create New Table
+</button>
+
+<!-- Modal -->
+<div class="modal fade" id="AddNewTableModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="AddNewTableModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="AddNewTableModalLabel">Add New Table</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+	  
+	   <h5>CREATE QUERY</h5>
+  <p>Although this is for advanced users but it is very simple to use it</p>
+  <textarea class="form-control" id="inputcreatequery" rows="8">CREATE TABLE contacts (
+	contact_id INTEGER PRIMARY KEY,
+	first_name TEXT NOT NULL,
+	last_name TEXT NOT NULL,
+	email TEXT NOT NULL,
+	phone TEXT NOT NULL
+);</textarea>
+  <hr>
+  
+  <p id="createtableupdateholder">Click save and wait for confirmation</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+		<button type="button" id="createtablesave_btn" class="btn btn-secondary">Save</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="AddNewTableDataModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="AddNewTableDataModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="AddNewTableDataModalLabel">Add New Record</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+	  
+	   <h4>Rules!</h4>
+  <p>Add NULL value to ID/Primary key column, it will be auto generated</p>
+  <button type="button" id="inputformgenerator" class="btn btn-secondary">Pull Table Info</button>
+  <hr>
+  <span id="inputformholder">
+
+  
+  </span>
+  <small>You may changes this query according to the needs. Add values separated by comma in the same order</small>
+   <textarea class="form-control" id="inputaddquery" rows="8"></textarea>
+  <p id="adddataupdateholder">Click save and wait for confirmation</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+		<button type="button" id="tabledatasave_btn" class="btn btn-secondary">Save</button>
+      </div>
+    </div>
+  </div>
+</div>
+    </div>
+	<div class="col">
+	<select id="selecttablenames" class="form-select" aria-label="Default select example">
+  <option selected value="0">Select Table</option>
+  
+</select>
+	</div>
+	 <div class="col-6">
+	 <div class="row">
+    <div class="col">
+    <button type="button" id="loadtable_btn" class="btn btn-secondary">Load Data</button>
+    </div>
+	<div class="col">
+    <button type="button" id="adddata_btn" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#AddNewTableDataModal">Add Data</button>
+    </div>
+   <div class="col">
+    <button type="button" id="searchdata_btn" class="btn btn-secondary">Search Data</button>
+    </div>
+	 <div class="col">
+    <button type="button" id="deletedata_btn"  class="btn btn-danger">Delete table</button>
+    </div>
+	</div>
+	</div>
+	
+	
+  </div>
+
+  </div>
+</div>
+			
+                
+                <div class="p-4 p-lg-5 bg-light rounded-3">
+				      
+                    <div class="m-4 m-lg-3">
+                       
+						<span class="badge rounded-pill bg-secondary">Table Name: </span><span id="tablenamepill" class="badge rounded-pill bg-info text-dark">Info</span> <span class="badge rounded-pill bg-secondary">Row Count: </span> <span id="trowcountpill" class="badge rounded-pill bg-info text-dark">Info</span>
+                        <table id="example" class="display" style="width:100%">
+       <thead>
+            <tr>
+                <th>Column 1</th>
+              
+                
+            </tr>
+        </thead>
+       <tbody>
+	   </tbody>
+    </table>
+
+                    </div>
+                </div>
+           
+        </header>
+		<div class="container">
+        <!-- Page Content-->
+        
+		</div>
+        <!-- Footer-->
+        <footer class="py-5 bg-dark">
+            <div class="container"><p class="m-0 text-center text-white">Happy!</p></div>
+        </footer>
+        <!-- Bootstrap core JS-->
+		<script type="text/javascript" src="jQuery-3.3.1/jquery-3.3.1.js"></script>
+		<script type="text/javascript" src="datatables/datatables.min.js"></script>
+		<script type="text/javascript" src="datatables/jquery.dataTables.min.js" /></script>
+		 <script src="js/bootstrap.bundle.min.js"></script>
+	
+		 <script src="helper/util.js"></script>
+		<script src="./renderer.js"></script>
+    </body>
+</html>
