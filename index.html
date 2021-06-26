@@ -121,8 +121,11 @@
       <div class="modal-body">
 	  
 	   <h4>Rules!</h4>
-  <p>Add NULL value to ID/Primary key column, it will be auto generated</p>
-  <button type="button" id="inputformgenerator" class="btn btn-secondary">Pull Table Info</button>
+  <p>Must generate a query first in both cases whether you wish to run the query or import a file</p>
+  <button type="button" id="inputformgenerator" class="btn btn-secondary">Generate Query</button> 
+  <hr>
+  <button type="button" id="fileimport" class="btn btn-secondary">Upload File</button> 
+  
   <hr>
   <span id="inputformholder">
 
@@ -173,7 +176,7 @@
   <option  value="ALTER">ALTER</option>
    <option  value="DROP">DROP</option>
 </select>
-  <button type="button" id="inputformgeneratorq" class="btn btn-secondary">Pull Table Info</button>
+  <button type="button" id="inputformgeneratorq" class="btn btn-secondary">Generate Query</button>
   <hr>
   <span id="inputformholderq">
 
@@ -225,6 +228,22 @@
                 </div>
            
         </header>
+		<div class="modal fade" id="alertmodal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Message</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <p id="alertmessage"></p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
 		<div class="container">
         <!-- Page Content-->
         

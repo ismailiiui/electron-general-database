@@ -1,7 +1,7 @@
 // Modules to control application life and create native browser window
 const {app, BrowserWindow} = require('electron')
 const path = require('path')
-
+const {ipcMain} = require('electron')  
 
 function createWindow () {
   // Create the browser window.
@@ -18,13 +18,39 @@ function createWindow () {
 
   // and load the index.html of the app.
   mainWindow.loadFile('index.html')
-  mainWindow.removeMenu();
+ // mainWindow.removeMenu();
   // Open the DevTools.
   // mainWindow.webContents.openDevTools()
   
 
 }
-
+ipcMain.handle('openFile', async (event, path) => { 
+   const {dialog} = require('electron') 
+   const fs = require('fs') 
+   return dialog.showOpenDialog(function (fileNamesd) { 
+      
+      // fileNames is an array that contains all the selected 
+      if(fileNamesd === undefined) { 
+         console.log("No file selected"); 
+      
+      } else { 
+         return readFile(fileNamesd[0]); 
+      } 
+   });
+   
+   function readFile(filepathd) { 
+      fs.readFile(filepathd, 'utf-8', (err, data) => { 
+         
+         if(err){ 
+            alert("An error ocurred reading the file :" + err.message) 
+            return 
+         } 
+         
+         // handle the file content 
+         return data 
+      }) 
+   } 
+})  
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.

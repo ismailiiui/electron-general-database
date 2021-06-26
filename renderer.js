@@ -8,8 +8,10 @@ const DATABASE_FILENAME = "file.db";
 const DATABASE_DRIVER = "sqlite3";
 const DATATABLE_ID = "#example";
 const databaseholder = require(DATABASE_DRIVER);
+const { readFile } = require('fs/promises');
 var table =$(DATATABLE_ID).DataTable();
 var querycountertext = "";
+var bulkinsertprefix = "";
 
 
 function addbuttonlistener(btnid,queryholderid,updateholderid)
@@ -197,6 +199,7 @@ function populate_generatedform(arrdata,id,tablename,textareaid,updateholderid,q
 	formbody.innerHTML = "";
 	var columnnames = "";
 	var updatecolumnsvalues = "";
+	var bulkinsertcolumnnames = "";
 	var columnvalues = "";
 	  for (let k in arrdata)
 	{
@@ -211,12 +214,14 @@ function populate_generatedform(arrdata,id,tablename,textareaid,updateholderid,q
 		{
 			columnvalues = columnvalues + "'',"
 			updatecolumnsvalues = updatecolumnsvalues + arrdata[k].name + "='',";
+			bulkinsertcolumnnames = bulkinsertcolumnnames + arrdata[k].name + ",";
 		}
 		formbody.innerHTML = formbody.innerHTML + modal_row(arrdata[k].name,arrdata[k].type + '  ' + nulldecide + '  ' +  ispk);
 		
 	}
 	columnnames = columnnames.substr(0,columnnames.length - 1);
 	columnvalues = columnvalues.substr(0,columnvalues.length - 1);
+    bulkinsertcolumnnames = bulkinsertcolumnnames.substr(0,bulkinsertcolumnnames.length - 1);
 	updatecolumnsvalues = updatecolumnsvalues.substr(0,updatecolumnsvalues.length - 1);
 	var querytext = "";
 	
@@ -228,6 +233,9 @@ function populate_generatedform(arrdata,id,tablename,textareaid,updateholderid,q
 	if (queryprefix.toLowerCase().indexOf('insert') == 0)
 	{
 		querytext = queryprefix + " " + tablename + " (" + columnnames + ") values(" + columnvalues + ")";
+		bulkinsertprefix = queryprefix + " " + tablename + " (" + bulkinsertcolumnnames + ")";
+		
+		
 	}
 	
 	if (queryprefix.toLowerCase().indexOf('update') == 0)
@@ -247,11 +255,12 @@ function populate_generatedform(arrdata,id,tablename,textareaid,updateholderid,q
 		querytext = queryprefix + " TABLE " + tablename;
 	}
 	console.log(querytext);
-	document.querySelector(textareaid).innerHTML = querytext;
+	
 	
 	document.querySelector(updateholderid).style.background = 'white';
     document.querySelector(updateholderid).innerHTML = '';
 	document.querySelector(textareaid).value = querytext;
+	document.querySelector(textareaid).focus();
 }
 
 function populatedatatables(tablequery,tablename,counterquery,resultsquery)
@@ -272,7 +281,7 @@ db.get(tablequery, function (err, row) {
 	 } else{
 		addtableheads(null,tablename, false,null,null);
 		updaterowcount(0);
-		alert("Looks like table is empty"); 
+		showalert("Looks like table is empty"); 
 	 }
 	
 	
@@ -325,7 +334,7 @@ function setup_eventlisteners()
 		   updatetablename(tablename);
 	   } else{
 		   
-		   alert('select a table');
+		   showalert('select a table');
 	   }
 	
   });
@@ -343,10 +352,10 @@ function setup_eventlisteners()
 	   if (tablename != "0")
 	   {
 		  
-		   getColumnNames(tablename,"#inputformholder","#inputaddquery","#adddataupdateholder","INSERT INTO ");
+		   getColumnNames(tablename,"#inputformholder","#inputaddquery","#adddataupdateholder","INSERT INTO");
 	   } else{
 		   
-		   alert('select a table');
+		   showalert('select a table');
 	   }
 	
   });
@@ -360,7 +369,7 @@ function setup_eventlisteners()
 		   getColumnNames(tablename,"#inputformholderq","#inputrunquery","#queryupdateholder",document.querySelector('#selectQueryType').value);
 	   } else{
 		   
-		   alert('select a table');
+		   showalert('select a table');
 	   }
 	
   });
@@ -382,14 +391,66 @@ popover.show();
 		  popover.hide();
 	   } else{
 		   
-		   alert('select a table');
+		   showalert('select a table');
 	   }
 	  });
   });
   
 	
 }
+function fileuploadsetup()
+{
+	const inputdElement = document.getElementById("fileimport");
+inputdElement.addEventListener("click", handletheFiles, false);
+function handletheFiles() {
+	var tablename = document.querySelector('#selecttablenames').value;
+		
+	   if (tablename.value == "0")
+	   {		   
+		   showalert('select a table');
+		   return;
+	   }
+	   
+	   if (bulkinsertprefix.toLowerCase().indexOf("insert into " + tablename.toLowerCase()) != 0)
+	   {
+		   showalert('Must generate query first');
+		   return;
+	   }
+ const {ipcRenderer} = require('electron') 
+      
+         ipcRenderer.invoke('openFile').then((result) => {
+			 if (!result.canceled)
+			 {
+				 
+				 try {
+						const controller = new AbortController();
+						const { signal } = controller;
+						const promise = readFile(result.filePaths[0], "utf-8");
 
+						// Abort the request before the promise settles.
+						console.log(promise);
+						
+						promise.then( (val) => console.log("asynchronous logging has val:",val) );
+						
+					} catch (err) {
+				// When a request is aborted - err is an AbortError
+				console.error(err);
+				}
+				 
+			 }
+
+})
+         
+}
+}
+function showalert(message)
+{
+	var myModal = new bootstrap.Modal(document.getElementById('alertmodal'), {
+  keyboard: false
+});
+	document.getElementById('alertmessage').innerHTML = message;
+	myModal.show();
+}
 //setupdbstuff();
 
 dbapp_populateinfo();
@@ -398,3 +459,4 @@ addbuttonlistener("createtablesave_btn","inputcreatequery","createtableupdatehol
 addbuttonlistener("tabledatasave_btn","inputaddquery","adddataupdateholder");
 addbuttonlistener("querytabledatasave_btn","inputrunquery","queryupdateholder");
 gettablenames();
+fileuploadsetup();

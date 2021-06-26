@@ -25,6 +25,7 @@
   },
   "dependencies": {
     "electron-squirrel-startup": "^1.0.0",
+    "fs": "0.0.1-security",
     "sqlite3": "^5.0.2",
     "trim-newlines": "^4.0.2"
   },
