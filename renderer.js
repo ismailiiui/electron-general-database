@@ -12,13 +12,16 @@ const { readFile } = require('fs/promises');
 var table =$(DATATABLE_ID).DataTable();
 var querycountertext = "";
 var bulkinsertprefix = "";
-
+var bulkinsertcolumnnames = "";
+var importedfilename = "";
+var csvdata = "";
+var tsvdata = "";
 
 function addbuttonlistener(btnid,queryholderid,updateholderid)
 {
-var ModalElBtn = document.getElementById(btnid);
+var ModalElBtn = document.querySelector(btnid);
 ModalElBtn.addEventListener('click', function (event) {
-	var querytext = document.querySelector("#" + queryholderid).value;
+	var querytext = document.querySelector(queryholderid).value;
 	var indexofwhere = querytext.toLowerCase().indexOf('where');
 	var whereclause = querytext.substr(indexofwhere, querytext.length - indexofwhere);
 	if (querytext.toLowerCase().indexOf("select") == 0)
@@ -199,7 +202,7 @@ function populate_generatedform(arrdata,id,tablename,textareaid,updateholderid,q
 	formbody.innerHTML = "";
 	var columnnames = "";
 	var updatecolumnsvalues = "";
-	var bulkinsertcolumnnames = "";
+	bulkinsertcolumnnames = "";
 	var columnvalues = "";
 	  for (let k in arrdata)
 	{
@@ -325,6 +328,8 @@ function addtableheads(arr,tablename,move,counterquery,resultsquery)
 
 function setup_eventlisteners()
 {
+
+	
 	var ModalElBtn = document.querySelector('#loadtable_btn');
    ModalElBtn.addEventListener('click', function (event) {
 	   var tablename = document.querySelector('#selecttablenames').value;
@@ -423,15 +428,16 @@ function handletheFiles() {
 			 {
 				 
 				 try {
-						const controller = new AbortController();
-						const { signal } = controller;
+					 importedfilename = result.filePaths[0];
 						const promise = readFile(result.filePaths[0], "utf-8");
 
 						// Abort the request before the promise settles.
 						console.log(promise);
+						var tempval = "";
+						promise.then( (val) => setupimporteddata(val));
 						
-						promise.then( (val) => console.log("asynchronous logging has val:",val) );
 						
+		
 					} catch (err) {
 				// When a request is aborted - err is an AbortError
 				console.error(err);
@@ -443,6 +449,77 @@ function handletheFiles() {
          
 }
 }
+function sortvalues(arr,num)
+{
+	if (arr.length < num)
+	{
+		return null;
+		
+	} else{
+		
+		for (k in arr)
+		{
+		arr[k]	= "'" + arr[k] + "'";
+		}
+		
+		
+		return arr.slice(0,num).join(',');
+		
+	}
+	
+}
+
+function setupimporteddata(tempval)
+{
+	
+		showalert('Your file will be imported into these columns -> [' + bulkinsertcolumnnames + ']. Make sure your data is in same order. ' + '<hr><button type="button" class="btn btn-outline-secondary btn-sm" id="btn_proceedimport">Proceed with Import</button><hr><progress id="csvfileprogress" max="100" value="0"></progress><hr>After finish, click on Load Data button on main screen.');
+		var btn_proceedimport = document.querySelector('#btn_proceedimport');
+		btn_proceedimport.addEventListener('click', function (event) {
+	   var tempdata = "";
+	   if (importedfilename.toLowerCase().includes(".csv"))
+	   {
+		   tempdata = tempval.split("\n");
+		   var tot = tempdata.length;
+		   var curr = 0;
+		   for (k in tempdata)
+		   {
+			   var row = tempdata[k].split(',');
+			   var tempjoins = (sortvalues(row,bulkinsertcolumnnames.split(',').length));
+			   if (tempjoins != null)
+			   {
+				   var executablequery = bulkinsertprefix + " values(" + tempjoins + ")";
+				   executequery(executablequery,null);
+				   curr += 1;
+				   document.querySelector('#csvfileprogress').value = (curr * 100 / tot);
+				   
+			   }
+		   }
+		   
+		  
+	   }
+	   if (importedfilename.toLowerCase().includes(".tsv"))
+	   {
+		   tempdata = tempval.split("\n");
+		   var tot = tempdata.length;
+		   var curr = 0;
+		    for (k in tempdata)
+		   {
+			   var row = tempdata[k].split('\t');
+			   var tempjoins = (sortvalues(row,bulkinsertcolumnnames.split(',').length));
+			   if (tempjoins != null)
+			   {
+				   var executablequery = bulkinsertprefix + " values(" + tempjoins + ")";
+				   executequery(executablequery,null);
+				   curr += 1;
+				   document.querySelector('#csvfileprogress').value = (curr * 100 / tot);
+			   }
+		   }
+	   }
+	   
+		});
+	
+}
+
 function showalert(message)
 {
 	var myModal = new bootstrap.Modal(document.getElementById('alertmodal'), {
@@ -455,8 +532,8 @@ function showalert(message)
 
 dbapp_populateinfo();
 setup_eventlisteners();
-addbuttonlistener("createtablesave_btn","inputcreatequery","createtableupdateholder");
-addbuttonlistener("tabledatasave_btn","inputaddquery","adddataupdateholder");
-addbuttonlistener("querytabledatasave_btn","inputrunquery","queryupdateholder");
+addbuttonlistener("#createtablesave_btn","#inputcreatequery","#createtableupdateholder");
+addbuttonlistener("#tabledatasave_btn","#inputaddquery","#adddataupdateholder");
+addbuttonlistener("#querytabledatasave_btn","#inputrunquery","#queryupdateholder");
 gettablenames();
 fileuploadsetup();
