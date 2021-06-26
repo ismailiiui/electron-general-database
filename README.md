@@ -1,4 +1,8 @@
-#Upcoming
+# Demo
+
+Blog about this application is maintained here https://alkits.blogspot.com/2021/06/electron-general-database-application.html
+
+# Upcoming
 
 Import of CSV/TSV
 
