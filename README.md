@@ -4,7 +4,7 @@ Blog about this application is maintained here https://alkits.blogspot.com/2021/
 
 # Upcoming
 
-Import of CSV/TSV
+Import of CSV/TSV (This feature has been added)
 
 # electron-general-database
 
